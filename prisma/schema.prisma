@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")   
+}
+
+model User {
+  id            String    @id @default(cuid())
+  googleId      String    @unique          
+  name          String?
+  email         String    @unique
+  image         String?
+
+  plan              Plan       @default(FREE)
+  planExpiresAt     DateTime?            
+  
+  credits           Int        @default(3)   
+  totalCredits      Int        @default(3)    
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  transactions      CreditTransaction[]
+  videos            Video[]
+  connectedAccounts ConnectedAccount[]
+  payments  Payment[]
+  jobs Job[]
+}
+
+enum Plan {
+  FREE 
+  CREATOR
+  PRO
+}
+
+
+model Payment {
+  id                String   @id @default(cuid())
+  
+  razorpayOrderId   String   @unique
+  razorpayPaymentId String   @unique         
+  razorpaySignature String
+  
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId            Plan
+  amount            Int                      
+  currency          String   @default("INR")
+  status            PaymentStatus @default(SUCCESS)
+  createdAt         DateTime @default(now())
+  @@index([userId])
+}
+
+enum PaymentStatus {
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+model ConnectedAccount {
+  id           String        @id @default(cuid())
+  userId       String
+  platform     Platform
+  accessToken  String        @db.Text
+  refreshToken String?       @db.Text
+  expiresAt    DateTime?
+  accountName  String?       
+  accountId    String?      
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  isConnected  Boolean  @default(true)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, platform]) 
+}
+
+enum Platform {
+  YOUTUBE
+  INSTAGRAM
+  FACEBOOK
+}
+
+model CreditTransaction {
+  id          String          @id @default(cuid())
+  userId      String
+  amount      Int             // positive = added, negative = deducted
+  type        TransactionType
+  description String?
+  referenceId String?         // videoId or payment intent ID
+  createdAt   DateTime        @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum TransactionType {
+  PURCHASE
+  DEDUCTION
+  REFUND
+  BONUS
+}
+
+model Video {
+  id           String      @id @default(cuid())
+  userId       String
+  jobId        String      @unique  
+  title        String
+  status       VideoStatus @default(PENDING)
+  videoUrl     String?
+  thumbnailUrl String?
+  videoKey String?
+  creditsUsed  Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  thumbnailKey String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job  @relation(fields: [jobId], references: [jobId])  
+}
+
+enum VideoStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+
+
+model Job {
+  id          String    @id @default(cuid())
+  userId      String
+  jobId       String    @unique   // your current uuid() based jobId
+  status      JobStatus @default(PENDING)
+  
+  niche       String
+  actionMode  String
+  context     String?   @db.Text
+  platforms   String[]  // YOUTUBE, INSTAGRAM, FACEBOOK
+  scriptMode  String
+  script      String?   @db.Text
+  
+  settings    Json
+  
+  errorMessage String?
+  
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video   Video?     
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum StepStatus {
+  PENDING
+  RUNNING
+  DONE
+  FAILED
+}
