@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const video_controller_1 = require("../controllers/video.controller");
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const router = (0, express_1.Router)();
+router.post("/generate", auth_middleware_1.authMiddleware, video_controller_1.generateVideoController);
+router.get("/recent", auth_middleware_1.authMiddleware, video_controller_1.getRecentVideos);
+router.get("/:id/playback-url", auth_middleware_1.authMiddleware, video_controller_1.getVideoPlaybackUrl);
+exports.default = router;

@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const connected_controller_1 = require("../controllers/connected.controller");
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const router = (0, express_1.Router)();
+router.get("/youtube/connect", connected_controller_1.connectYoutube);
+router.get("/facebook/connect", connected_controller_1.connectToFacebook);
+router.get("/youtube/callback", connected_controller_1.youtubeCallback);
+router.get("/facebook/callback", connected_controller_1.facebookCallback);
+router.get("/accounts", auth_middleware_1.authMiddleware, connected_controller_1.getConnectedAccounts);
+router.delete("/:platform", auth_middleware_1.authMiddleware, connected_controller_1.disconnectAccount);
+exports.default = router;
