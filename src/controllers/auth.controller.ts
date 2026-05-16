@@ -17,7 +17,7 @@ export const signUp = async (req: Request, res: Response) => {
           email,
           name,
           image,
-          credits: 10,
+          credits: 3,
           transactions: {
             create: {
               amount: 10,

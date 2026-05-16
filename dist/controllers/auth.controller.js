@@ -23,7 +23,7 @@ const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     email,
                     name,
                     image,
-                    credits: 10,
+                    credits: 3,
                     transactions: {
                         create: {
                             amount: 10,

@@ -53,7 +53,7 @@ function createVideo(scenes, clipPaths, niche, voiceSpeed, workDir, audioPath, s
                 yield new Promise((resolve, reject) => {
                     (0, child_process_1.exec)(`ffmpeg -y -i "${src}" -t ${scenes[i].duration} \
           -vf "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,fps=30" \
-          -c:v libx264 -preset fast -pix_fmt yuv420p \
+          -c:v libx264 -preset ultrafast -threads 0 -pix_fmt yuv420p \
           -r 30 -an "${trimmed}"`, (err, _, stderr) => {
                         if (err) {
                             console.error(`❌ Trim clip ${i} failed:`, stderr);
@@ -86,7 +86,7 @@ function createVideo(scenes, clipPaths, niche, voiceSpeed, workDir, audioPath, s
       -t ${duration} \
       -filter_complex "[0:v]fps=30,setsar=1,ass='${assPathForFilter}'[v];[1:a]volume=1.0[voice];[2:a]volume=0.22,afade=t=in:st=0:d=2,afade=t=out:st=${duration - 2}:d=2[music];[voice][music]amix=inputs=2:duration=first[a]" \
       -map "[v]" -map "[a]" \
-      -c:v libx264 -preset fast -pix_fmt yuv420p \
+      -c:v libx264 -preset ultrafast -threads 0 -pix_fmt yuv420p \
       -c:a aac -b:a 192k \
       "${outputPath}"`;
             (0, child_process_1.exec)(command, (error, _, stderr) => {
